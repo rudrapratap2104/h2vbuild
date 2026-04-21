@@ -18,8 +18,21 @@ const PORT = process.env.PORT || 3001;
 // ── Security ──────────────────────────────────────────────────
 app.use(helmet());
 
+// Allow Live Server (port 5500 or 5501) + any configured origin
+const ALLOWED_ORIGINS = [
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:5501',
+  'http://127.0.0.1:5501',
+  'http://localhost:3000',
+  process.env.ALLOWED_ORIGIN,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5500',
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: Origin ${origin} not allowed`));
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 }));
