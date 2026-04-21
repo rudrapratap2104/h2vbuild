@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TruthPulse 2026 — AI Verification Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4l3 3"/>
+              <path d="M9 3.5A9 9 0 0 1 21 12"/>
+            </svg>
+          </div>
+          <span class="logo-text">TruthPulse</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">RECENT ANALYSES</div>
+        <div class="history-list" id="historyList">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="stat-chip">
+          <span class="stat-dot verified"></span>
+          <span id="verifiedCount">0</span> Verified
+        </div>
+        <div class="stat-chip">
+          <span class="stat-dot flagged"></span>
+          <span id="flaggedCount">0</span> Flagged
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Open sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-center">
+          <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span>System Online · v3.7.1</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="model-badge">GPT-4o VISION</div>
+        </div>
+      </header>
+
+      <!-- Hero Input Zone -->
+      <section class="input-zone" id="inputZone">
+        <div class="hero-eyebrow">AI-POWERED FACT VERIFICATION</div>
+        <h1 class="hero-title">What needs to be<br/><em>verified?</em></h1>
+        <p class="hero-sub">Enter a claim, paste a URL, or drop an image for forensic analysis.</p>
+
+        <!-- Input card -->
+        <div class="input-card" id="inputCard">
+          <div class="input-tabs">
+            <button class="tab-btn active" data-tab="text">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Text / URL
+            </button>
+            <button class="tab-btn" data-tab="image">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Image
+            </button>
+          </div>
+
+          <div class="tab-panel active" id="tab-text">
+            <textarea
+              id="claimInput"
+              class="claim-textarea"
+              placeholder="E.g. 'The Eiffel Tower was built in 1901' or paste a URL..."
+              rows="4"
+            ></textarea>
+          </div>
+
+          <div class="tab-panel" id="tab-image">
+            <div class="dropzone" id="dropzone">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <p class="dropzone-text">Drop image here or <label for="fileInput" class="file-label">browse files</label></p>
+              <p class="dropzone-hint">PNG, JPG, WEBP — Max 10MB</p>
+              <input type="file" id="fileInput" accept="image/*" hidden />
+              <div class="preview-container" id="previewContainer" style="display:none;">
+                <img id="imagePreview" class="image-preview" src="" alt="Preview" />
+                <button class="remove-img" id="removeImg">✕ Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-actions">
+            <div class="char-count" id="charCount">0 / 2000</div>
+            <button class="analyze-btn" id="analyzeBtn">
+              <span class="btn-text">Analyze Claim</span>
+              <span class="btn-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading / Stepper -->
+      <section class="loading-zone" id="loadingZone" style="display:none;">
+        <div class="stepper-card">
+          <div class="stepper-header">
+            <div class="spinner-ring"></div>
+            <span class="stepper-title">Forensic Analysis Running</span>
+          </div>
+          <div class="stepper-list" id="stepperList">
+            <div class="step-item" data-step="0">
+              <div class="step-dot"></div>
+              <div class="step-content">
+                <div class="step-label">Querying Knowledge Base</div>
+                <div class="step-sub">Cross-referencing 2.4B verified claims...</div>
+              </div>
+            </div>
+            <div class="step-item" data-step="1">
+              <div class="step-dot"></div>
+              <div class="step-content">
+                <div class="step-label">Analyzing Semantic Structure</div>
+                <div class="step-sub">Extracting entities and temporal markers...</div>
+              </div>
+            </div>
+            <div class="step-item" data-step="2">
+              <div class="step-dot"></div>
+              <div class="step-content">
+                <div class="step-label">Retrieving Source Evidence</div>
+                <div class="step-sub">Scanning authoritative databases...</div>
+              </div>
+            </div>
+            <div class="step-item" data-step="3">
+              <div class="step-dot"></div>
+              <div class="step-content">
+                <div class="step-label">Synthesizing Findings</div>
+                <div class="step-sub">Generating confidence score...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Result Dashboard -->
+      <section class="result-zone" id="resultZone" style="display:none;">
+        <div class="result-header-row">
+          <button class="back-btn" id="backBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            New Analysis
+          </button>
+          <div class="result-timestamp" id="resultTimestamp"></div>
+        </div>
+
+        <!-- Verdict Banner -->
+        <div class="verdict-banner" id="verdictBanner">
+          <div class="verdict-icon" id="verdictIcon"></div>
+          <div class="verdict-text">
+            <div class="verdict-label" id="verdictLabel">VERDICT</div>
+            <div class="verdict-claim" id="verdictClaim"></div>
+          </div>
+        </div>
+
+        <!-- Score + Summary Row -->
+        <div class="score-row">
+          <!-- Confidence Gauge -->
+          <div class="gauge-card reveal-card">
+            <div class="gauge-label">CONFIDENCE SCORE</div>
+            <div class="gauge-wrapper">
+              <svg class="gauge-svg" viewBox="0 0 200 200">
+                <circle class="gauge-bg" cx="100" cy="100" r="80" fill="none" stroke-width="12"/>
+                <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="80" fill="none" stroke-width="12"
+                  stroke-dasharray="502.65"
+                  stroke-dashoffset="502.65"
+                  transform="rotate(-90 100 100)"
+                />
+              </svg>
+              <div class="gauge-center">
+                <div class="gauge-percent" id="gaugePercent">0%</div>
+                <div class="gauge-sub">Confidence</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Card -->
+          <div class="summary-card reveal-card">
+            <div class="summary-label">AI ASSESSMENT</div>
+            <p class="summary-text" id="summaryText"></p>
+            <div class="tag-row" id="tagRow"></div>
+          </div>
+        </div>
+
+        <!-- Evidence Cards -->
+        <div class="evidence-header">
+          <div class="evidence-label">EVIDENCE SOURCES</div>
+          <div class="evidence-count" id="evidenceCount"></div>
+        </div>
+        <div class="evidence-grid" id="evidenceGrid">
+          <!-- populated by JS -->
+        </div>
+
+        <!-- Skeleton loaders -->
+        <div class="skeleton-grid" id="skeletonGrid">
+          <div class="skeleton-card"><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w90"></div><div class="skeleton-line w50"></div></div>
+          <div class="skeleton-card"><div class="skeleton-line w70"></div><div class="skeleton-line w80"></div><div class="skeleton-line w60"></div><div class="skeleton-line w75"></div></div>
+          <div class="skeleton-card"><div class="skeleton-line w90"></div><div class="skeleton-line w55"></div><div class="skeleton-line w70"></div><div class="skeleton-line w85"></div></div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
